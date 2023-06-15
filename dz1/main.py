@@ -42,6 +42,8 @@ class DevisorsFinder():
             if not num%i:
                 out.add(i)
                 self.globalOps +=1
+            else: 
+                self.globalOps +=1
         return len(out)
 
     def printOutput(self) -> str:
@@ -58,7 +60,7 @@ def main():
     fun.printOutput()
     fun.Complexity()
     print("""По сложности .... каждая N даёт ещё одну проходку по A[i]"""\
-          + "Предпложу что это O(n) потому что хоть циклов и 2, но O(n**2) алгоритм не тянет."
+          + "Два цикла for намекают на O(n**2)."
           )
 
 
