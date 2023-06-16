@@ -108,37 +108,28 @@ class Linked_list():
         walk_left = self.head
         walk_right = self.tail
         # шагаем к центру
+        
         while left[1] < right[1]:
-            print(left[0], right[0])
+            left_m = walk_left
+            right_m = walk_right
+
+            if left_m == self.head:
+                tmp1 = self.head.next
+                tmp2 = self.tail.prev
+                left_m.prev = tmp2
+                left_m.next = None
+                self.tail = left_m
+                right_m.prev = None
+                right_m.next = tmp1
+                self.head = right_m
+            else:
+                pass
+
+
+
+            # сдвиг индексов
             walk_left = walk_left.next
             walk_right = walk_right.prev
-            left[0] = walk_left
-            right[0] = walk_right
-            # обращаемся к левому краю
-            if left[0].prev == None:
-                left[0].prev = self.tail.prev
-                left[0].next = None
-                self.tail = left[0]
-            else:
-                # левая часть
-                left[0].next = right[0].next
-                left[0].prev = right[0].prev
-                right[0].next = left[0].next
-                right[0].prev = right[0].prev
-        
-            # обращаемся к правому краю
-            if right[0].next == None:
-                right[0].next = self.head.next
-                right[0].prev = None
-                self.head = right[0]
-            else:
-                # правая часть
-                left[0].next = right[0].next
-                left[0].prev = right[0].prev
-                right[0].next = left[0].next
-                right[0].prev = left[0].prev
-                pass
-            # сдвиг индексов
             left[1] += 1
             right[1] -= 1
 
