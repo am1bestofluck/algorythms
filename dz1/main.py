@@ -5,6 +5,7 @@
 Для полученного решения укажите сложность в О-нотации. """
 from datetime import datetime
 import random
+
 class Randomizer():
     """собираем массив чисел для выборки"""
     def __init__(self,quantity_i:int):
@@ -41,9 +42,7 @@ class DevisorsFinder():
         for i in range(2,num):
             if not num%i:
                 out.add(i)
-                self.globalOps +=1
-            else: 
-                self.globalOps +=1
+            self.globalOps +=1
         return len(out)
 
     def printOutput(self) -> str:
