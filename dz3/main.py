@@ -1,4 +1,5 @@
 from datetime import datetime
+from copy import deepcopy
 """Необходимо реализовать метод разворота связного списка 
 (двухсвязного или односвязного на выбор)."""
 
@@ -94,45 +95,28 @@ class Linked_list():
         if len(self) == 1:
             return
         # из двух - не сложно
-        if len(self) == 2:
-            temp = self.tail
-            self.tail = self.head
-            self.head = temp
-            self.tail.prev = self.head
-            self.tail.next = None
-            self.head.next = self.tail
-            self.head.prev = None
-            return
+        # if len(self) == 2:
+        #     temp = self.tail
+        #     self.tail = self.head
+        #     self.head = temp
+        #     self.tail.prev = self.head
+        #     self.tail.next = None
+        #     self.head.next = self.tail
+        #     self.head.prev = None
+        #     return
         # ну поехали
-        left, right = [self.head, 0], [self.tail, len(self)-1]
-        walk_left = self.head
-        walk_right = self.tail
-        # шагаем к центру
-        
-        while left[1] < right[1]:
-            left_m = walk_left
-            right_m = walk_right
-
-            if left_m == self.head:
-                tmp1 = self.head.next
-                tmp2 = self.tail.prev
-                left_m.prev = tmp2
-                left_m.next = None
-                self.tail = left_m
-                right_m.prev = None
-                right_m.next = tmp1
-                self.head = right_m
-            else:
-                pass
-
-
-
-            # сдвиг индексов
-            walk_left = walk_left.next
-            walk_right = walk_right.prev
-            left[1] += 1
-            right[1] -= 1
-
+        buffer = self.tail
+        while buffer:
+            copy_ = deepcopy(buffer)
+            try:
+                newL_list.add_last(copy_)
+            except:
+                newL_list = Linked_list(copy_)
+            newL_list.tail.next = None
+            buffer = buffer.prev
+        self.head = newL_list.head
+        self.tail = newL_list.tail
+            
 
 def main():
     # заполняем
