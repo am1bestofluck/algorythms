@@ -83,6 +83,7 @@ class RedBlackTree():
     "собственно дерево"
     def __init__(self, root_node:Node) -> None:
         self.root = root_node
+        root_node =
     
     def balance(self):
         raise NotImplementedError
