@@ -249,7 +249,8 @@ def main():
         queue.add_first(ll_node(i))
     RBT = RedBlackTree(Node(queue.pop_last().get()))
     while queue:
-        RBT.add(RBT.root,queue.pop_last().get())
+        a = RBT.add(RBT.root,queue.pop_last().get())
+        print(a)
     
     print(RBT)
     print(RBT.walk(RBT.root))
