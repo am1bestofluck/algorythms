@@ -84,6 +84,7 @@ class RedBlackTree():
     "собственно дерево"
     def __init__(self, root_node:Node) -> None:
         self.root = root_node
+        self.root.set_color(Color.BLACK)
     
     def balance(self):
         """условный мэйн;
@@ -148,37 +149,68 @@ class RedBlackTree():
         while current_line:
             print(f"floor: {floors}")
             floors +=1
+            next_line = list[Node]()
             for node_ in current_line:
                 print(node_)
-            next_line = list[Node]()
-            if node_.left_child:
-                next_line.append(node_.left_child)
-            if node_.right_child:
-                next_line.append(node_.right_child)
+                if node_.left_child:
+                    next_line.append(node_.left_child)
+                if node_.right_child:
+                    next_line.append(node_.right_child)
             current_line = next_line
 
+    def add(self,new_value):
+        if self.root is None:
+            self.root = Node(new_value)
+            return True
         
-    def add(self, node_: Node, new_value:int) -> bool:
-        """добавляем ноду если такой нет -> true
-        если такая есть  -> false"""
-        if node_.get_value() == new_value:
-            return False
-        if node_.get_value() < new_value:
-            if node_.right_child:
-                result = self.add(node_.right_child,new_value)
-                return result
+        search = self.root
+        gotPlace=False
+        while not gotPlace:
+            if new_value > search.get_value():
+                if search.right_child is not None:
+                    search = search.right_child
+                else:
+                    new_node = Node(new_value)
+                    new_node.set_color(Color.RED)
+                    search.right_child = new_node
+                    return True
+
+            elif new_value < search.get_value():
+                if search.left_child is not None:
+                    search = search.left_child
+                else:
+                    new_node = Node(new_value)
+                    new_node.set_color(Color.RED)
+                    search.left_child = new_node
+                    return True
             else:
-                node_.right_child = Node(new_value)
-                node_.right_child.set_color(Color.RED)
-                return True
-        else:
-            if node_.left_child:
-                result = self.add(node_.left_child,new_value)
-                return result
-            else:
-                node_.left_child = Node(new_value)
-                node_.left_child.set_color(Color.RED)
-                return True
+                return False # нельзя добавить дубликат
+
+        
+
+            
+    # эту переделал
+    # def __addNode(self, node_: Node, new_value:int) -> bool:
+    #     """добавляем ноду если такой нет -> true
+    #     если такая есть  -> false"""
+    #     if node_.get_value() == new_value:
+    #         return False
+    #     if node_.get_value() < new_value:
+    #         if node_.right_child:
+    #             result = self.__addNode(node_.right_child,new_value)
+    #             return result
+    #         else:
+    #             node_.right_child = Node(new_value)
+    #             node_.right_child.set_color(Color.RED)
+    #             return True
+    #     else:
+    #         if node_.left_child:
+    #             result = self.__addNode(node_.left_child,new_value)
+    #             return result
+    #         else:
+    #             node_.left_child = Node(new_value)
+    #             node_.left_child.set_color(Color.RED)
+    #             return True
         
     def remove(self) -> bool:
         """удаляем ноду если она есть -> true
@@ -200,13 +232,13 @@ class RedBlackTree():
         
         while current_line:
             out['floors'] +=1
+            next_line = list[Node]()
             for node_ in current_line:
                 out['nodes'] +=1
-            next_line = list[Node]()
-            if node_.left_child:
-                next_line.append(node_.left_child)
-            if node_.right_child:
-                next_line.append(node_.right_child)
+                if node_.left_child:
+                    next_line.append(node_.left_child)
+                if node_.right_child:
+                    next_line.append(node_.right_child)
             current_line = next_line
         return out
     def __str__(self):
@@ -249,7 +281,7 @@ def main():
         queue.add_first(ll_node(i))
     RBT = RedBlackTree(Node(queue.pop_last().get()))
     while queue:
-        a = RBT.add(RBT.root,queue.pop_last().get())
+        a = RBT.add(queue.pop_last().get())
         print(a)
     
     print(RBT)
