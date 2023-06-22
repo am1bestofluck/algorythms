@@ -25,7 +25,8 @@ from copy import deepcopy
 from random import choice, sample
 
 
-from linked_list import Linked_list, Node as ll_node
+from linked_list import Node as ll_node
+from Linked_list_tweaked import Linked_list_tweaked as Linked_list
 
 class Color(Enum):
     """цвет"""
@@ -83,19 +84,135 @@ class RedBlackTree():
     "собственно дерево"
     def __init__(self, root_node:Node) -> None:
         self.root = root_node
-        root_node =
     
     def balance(self):
+        """условный мэйн;
+        балансируем дерево"""        
         raise NotImplementedError
     
-    def add(self):
+    def __color_swap(Node):
+            """красим детей если они `оба красные`?
+              у нас тут левостороннее дерево, эта функция должна быть
+              невостребованной"""
+            raise NotImplementedError
+    
+    def __turn_left(Node):
+        """разворачиваем локальный набор нод влево"""
         raise NotImplementedError
     
-    def remove(self):
+    def __turn_right(Node):
+        """разворачиваем локальный набор нод вправо"""
         raise NotImplementedError
     
+    def find( self, value:int, node_ir:Node) -> Node | None: # получилось :)
+        """возвращаем ноду с этим значением
+        или None если такой не нашлось
+        проход в глубину
+        """
+        if node_ir.get_value() == value:
+            return node_ir
+        for child_ in [node_ir.left_child,node_ir.right_child]:
+            try:
+                result = self.find(value,child_)
+            except AttributeError:
+                result = None
+            if result:
+                return result
+            
+        return None
+    def walk(self, node_ir:Node):
+        """идём по нодам, читаем значения"""
+        # в глубину  не фонтан
+        """
+        if node_ir == self.root:
+            print("root: ", end = " ")
+        if node_ir.get_value():
+            print(node_ir.get_value())
+        for child_ in [node_ir.left_child,node_ir.right_child]:
+            try:
+                if child_ == node_ir.left_child:
+                    print( "left:",end = " ")
+                    self.walk(child_)
+                else:
+                    print( "right:",end = " ")
+                    self.walk(child_)
+            except AttributeError:
+                pass
+            print()
+        """
+        floors=0
+
+        current_line = list[Node]()
+        current_line.append(self.root)
+        
+        while current_line:
+            print(f"floor: {floors}")
+            floors +=1
+            for node_ in current_line:
+                print(node_)
+            next_line = list[Node]()
+            if node_.left_child:
+                next_line.append(node_.left_child)
+            if node_.right_child:
+                next_line.append(node_.right_child)
+            current_line = next_line
+
+        
+    def add(self, node_: Node, new_value:int) -> bool:
+        """добавляем ноду если такой нет -> true
+        если такая есть  -> false"""
+        if node_.get_value() == new_value:
+            return False
+        if node_.get_value() < new_value:
+            if node_.right_child:
+                result = self.add(node_.right_child,new_value)
+                return result
+            else:
+                node_.right_child = Node(new_value)
+                node_.right_child.set_color(Color.RED)
+                return True
+        else:
+            if node_.left_child:
+                result = self.add(node_.left_child,new_value)
+                return result
+            else:
+                node_.left_child = Node(new_value)
+                node_.left_child.set_color(Color.RED)
+                return True
+        
+    def remove(self) -> bool:
+        """удаляем ноду если она есть -> true
+        если такой не нашлось -> false
+        разобраться с детьми"""
+        raise NotImplementedError
+    
+    def size(self): # получилось ^^
+        """проходим по дереву, считаем сколько нод,
+          и если получится - сколько этажей
+          проход в ширину"""
+        
+        out = {
+            "floors":0,
+            "nodes":0
+        }
+        current_line = list[Node]()
+        current_line.append(self.root)
+        
+        while current_line:
+            out['floors'] +=1
+            for node_ in current_line:
+                out['nodes'] +=1
+            next_line = list[Node]()
+            if node_.left_child:
+                next_line.append(node_.left_child)
+            if node_.right_child:
+                next_line.append(node_.right_child)
+            current_line = next_line
+        return out
     def __str__(self):
-        return """Tree."""
+        tmp = self.size()
+        return f"""Tree with root {str(self.root)};\n"""\
+            + f"Has {tmp['floors']} floors and {tmp['nodes']} nodes."
 
 def check_eq():
     """к задаче не относится, тестирую дандеры"""
@@ -125,13 +242,18 @@ def compareNodes():
     print('ok!')
 
 def main():
-    values = sample(range(1000),k = 10)
+    values = sample(range(1000),k = 10) # range(10)
     queue = Linked_list(ll_node(values[0]))
     for i in values[1:]:
+        print(i)
         queue.add_first(ll_node(i))
     RBT = RedBlackTree(Node(queue.pop_last().get()))
-    print(RBT.root)
+    while queue:
+        RBT.add(RBT.root,queue.pop_last().get())
+    
     print(RBT)
+    print(RBT.walk(RBT.root))
+    print()
 
 if __name__ == "__main__":
     main()
