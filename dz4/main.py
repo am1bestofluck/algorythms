@@ -195,7 +195,10 @@ class RedBlackTree():
                     next_line.append(node_.right_child)
             current_line = next_line
 
-    def add(self,new_value):
+    def add(self,new_value) -> bool:
+        if self.find(Node(new_value)):
+            return False
+        
         if self.root is None:
             self.root = Node(new_value)
             self.root.set_color(Color.BLACK)
@@ -204,11 +207,11 @@ class RedBlackTree():
         while True:
             if new_value > search.get_value():
                 if search.right_child is not None:
-                    search = self.__balance(search)
                     search = search.right_child
+                    search = self.__balance(search)
+                    
                 else:
                     new_node = Node(value_i=new_value,parent_node=search)
-                    new_node.set_color(Color.RED)
                     search.right_child = new_node
                     self.root.set_color(Color.BLACK)
                     return True
@@ -220,7 +223,6 @@ class RedBlackTree():
                     
                 else:
                     new_node = Node(value_i=new_value,parent_node=search)
-                    new_node.set_color(Color.RED)
                     search.left_child = new_node
                     self.root.set_color(Color.BLACK)
                     return True
