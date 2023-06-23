@@ -9,7 +9,7 @@ from enum import Enum, auto
 • Корень дерева всегда черный
 • Новая нода всегда красная
 • Красные ноды могут быть только левым ребенком
-• У краной ноды все дети черного цвета
+• У красной ноды все дети черного цвета
 
 Соответственно, чтобы данные условия выполнялись, 
 после добавления элемента в дерево необходимо произвести балансировку, 
@@ -40,11 +40,13 @@ class Node():
                  value_i:int = None,
                  left_child_i:'Node' = None,
                  right_child_i:'Node' = None,
-                 color_i:Color = Color.RED):
+                 color_i:Color = Color.RED,
+                 parent_node:'Node' = None):
         self.__value = value_i
         self.left_child = left_child_i
         self.right_child = right_child_i
         self.__color = color_i
+        self.parent = parent_node
         self.__create_date = datetime.now().timestamp
 
     def set_value(self,new_int:int):
@@ -61,9 +63,12 @@ class Node():
             self.__color = new_color
         else:
             print("Not changed. Enum `Color` expected.")
-
+    def get_color(self):
+        return self.__color
+    
     def __str__(self):
-        return f"{self.__color.name} Node with value {self.__value}"
+        return f"{self.__color.name}: {self.__value}_"\
+            +f"(Root: {str(self.parent)})"
             # рекурсивно выводим детей.. громоздко и не нужно
             # + f' {f" Left child: {str(self.left_child)}" if self.left_child else ""}' \
             # + f'{f" Right child: {str(self.right_child)}" if self.right_child else ""}' 
@@ -81,30 +86,63 @@ class Node():
         return self.__value > other_node.get_value()
 
 class RedBlackTree():
-    "собственно дерево"
+    """собственно дерево"""
     def __init__(self, root_node:Node) -> None:
         self.root = root_node
         self.root.set_color(Color.BLACK)
     
-    def balance(self):
-        """условный мэйн;
-        балансируем дерево"""        
-        raise NotImplementedError
     
-    def __color_swap(Node):
-            """красим детей если они `оба красные`?
-              у нас тут левостороннее дерево, эта функция должна быть
-              невостребованной"""
-            raise NotImplementedError
+    def __color_swap(self, node_i:Node) -> None:
+        """красим детей если они `оба красные`?
+            у нас тут левостороннее дерево, эта функция должна быть
+            невостребованной"""
+        node_i.set_color( Color.RED)
+        node_i.left_child.set_color(Color.BLACK)
+        node_i.right_child.set_color(Color.BLACK)
+        return None
     
-    def __turn_left(Node):
-        """разворачиваем локальный набор нод влево"""
-        raise NotImplementedError
+    def __turn_left(self,node_i:Node) -> Node:
+        left_child_ = node_i.left_child
+        between_child_ = left_child_.right_child
+        left_child_.right_child = node_i
+        node_i.left_child = between_child_
+        left_child_.set_color(node_i.get_color())
+        node_i.set_color(Color.RED) 
+        return left_child_
     
-    def __turn_right(Node):
+    def __turn_right(self,node_i:Node) -> Node:
         """разворачиваем локальный набор нод вправо"""
-        raise NotImplementedError
+        right_child_ = node_i.right_child
+        between_child_ = right_child_.left_child
+        right_child_.left_child = node_i
+        node_i.right_child = between_child_
+        right_child_.set_color(node_i.get_color())
+        node_i.set_color(Color.RED)
+        return right_child_
     
+    def __balance(self,node_i:Node):
+        """условный мэйн;
+        балансируем дерево"""
+        result = node_i
+        needsRebalance = True
+        while needsRebalance:
+            needsRebalance = False
+            if result.left_child is not None and result.right_child is not None\
+                    and result.left_child.get_color() == Color.BLACK\
+                    and result.right_child.get_color() == Color.RED:
+                result = self.__turn_right(result)
+                needsRebalance = True
+            if result.left_child is not None and\
+                    result.left_child.left_child is not None and\
+                    result.left_child.get_color() == Color.RED and\
+                    result.left_child.left_child.get_color() == Color.RED:
+                result = self.__turn_left(result)
+                needsRebalance = True
+            if result.left_child is not None and result.right_child is not None\
+                    and result.left_child.get_color() == Color.RED\
+                    and result.right_child.get_color() == Color.RED:
+                self.__color_swap(result)
+        return result
     def find( self, value:int, node_ir:Node) -> Node | None: # получилось :)
         """возвращаем ноду с этим значением
         или None если такой не нашлось
@@ -121,6 +159,7 @@ class RedBlackTree():
                 return result
             
         return None
+    
     def walk(self, node_ir:Node):
         """идём по нодам, читаем значения"""
         # в глубину  не фонтан
@@ -142,10 +181,8 @@ class RedBlackTree():
             print()
         """
         floors=0
-
         current_line = list[Node]()
         current_line.append(self.root)
-        
         while current_line:
             print(f"floor: {floors}")
             floors +=1
@@ -161,38 +198,41 @@ class RedBlackTree():
     def add(self,new_value):
         if self.root is None:
             self.root = Node(new_value)
+            self.root.set_color(Color.BLACK)
             return True
-        
         search = self.root
-        gotPlace=False
-        while not gotPlace:
+        while True:
             if new_value > search.get_value():
                 if search.right_child is not None:
+                    search = self.__balance(search)
                     search = search.right_child
                 else:
-                    new_node = Node(new_value)
+                    new_node = Node(value_i=new_value,parent_node=search)
                     new_node.set_color(Color.RED)
                     search.right_child = new_node
+                    self.root.set_color(Color.BLACK)
                     return True
 
             elif new_value < search.get_value():
                 if search.left_child is not None:
+                    search = self.__balance(search)
                     search = search.left_child
+                    
                 else:
-                    new_node = Node(new_value)
+                    new_node = Node(value_i=new_value,parent_node=search)
                     new_node.set_color(Color.RED)
                     search.left_child = new_node
+                    self.root.set_color(Color.BLACK)
                     return True
             else:
                 return False # нельзя добавить дубликат
 
-        
 
-            
+    """        
     # эту переделал
     # def __addNode(self, node_: Node, new_value:int) -> bool:
-    #     """добавляем ноду если такой нет -> true
-    #     если такая есть  -> false"""
+    #     добавляем ноду если такой нет -> true
+    #     если такая есть  -> false
     #     if node_.get_value() == new_value:
     #         return False
     #     if node_.get_value() < new_value:
@@ -211,6 +251,7 @@ class RedBlackTree():
     #             node_.left_child = Node(new_value)
     #             node_.left_child.set_color(Color.RED)
     #             return True
+    """
         
     def remove(self) -> bool:
         """удаляем ноду если она есть -> true
@@ -241,10 +282,14 @@ class RedBlackTree():
                     next_line.append(node_.right_child)
             current_line = next_line
         return out
+    
     def __str__(self):
         tmp = self.size()
         return f"""Tree with root {str(self.root)};\n"""\
             + f"Has {tmp['floors']} floors and {tmp['nodes']} nodes."
+
+
+
 
 def check_eq():
     """к задаче не относится, тестирую дандеры"""
@@ -274,15 +319,13 @@ def compareNodes():
     print('ok!')
 
 def main():
-    values = sample(range(1000),k = 10) # range(10)
+    values = sample(range(100),k = 15)
     queue = Linked_list(ll_node(values[0]))
     for i in values[1:]:
-        print(i)
         queue.add_first(ll_node(i))
     RBT = RedBlackTree(Node(queue.pop_last().get()))
     while queue:
-        a = RBT.add(queue.pop_last().get())
-        print(a)
+        RBT.add(queue.pop_last().get())
     
     print(RBT)
     print(RBT.walk(RBT.root))
